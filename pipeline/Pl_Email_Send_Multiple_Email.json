@@ -92,7 +92,7 @@
 				"typeProperties": {
 					"variableName": "prepare_body",
 					"value": {
-						"value": "Data ingestion has been initiated for all tables. Their respective statuses are listed below: ', @{replace(string(pipeline().parameters.list_of_tables), '\"', '')}",
+						"value": "Data ingestion has been initiated for all tables. Their respective statuses are listed below: ', @{replace(string(pipeline().parameters.list_of_tables), '\"', '')} run_id is @{pipeline().parameters.Pl_run_id}",
 						"type": "Expression"
 					}
 				}
@@ -104,6 +104,9 @@
 			},
 			"list_of_tables": {
 				"type": "array"
+			},
+			"Pl_run_id": {
+				"type": "string"
 			}
 		},
 		"variables": {

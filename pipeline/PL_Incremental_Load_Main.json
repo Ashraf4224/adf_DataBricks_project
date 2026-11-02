@@ -294,6 +294,10 @@
 						"list_of_tables": {
 							"value": "@variables('on_success')",
 							"type": "Expression"
+						},
+						"Pl_run_id": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
 						}
 					}
 				}
