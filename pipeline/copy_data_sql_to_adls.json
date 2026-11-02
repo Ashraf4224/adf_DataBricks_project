@@ -29,7 +29,7 @@
 								"source": {
 									"type": "AzureSqlSource",
 									"sqlReaderQuery": {
-										"value": "select * from @{pipeline().parameters.Pl_schema_name}.@{}",
+										"value": "select * from @{pipeline().parameters.Pl_schema_name}.@{pipeline().parameters.Pl_table_name} where watermark > '@{pipeline().parameters.Pl_water_mark}'",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
