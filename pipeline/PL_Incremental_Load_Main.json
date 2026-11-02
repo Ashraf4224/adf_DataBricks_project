@@ -211,6 +211,10 @@
 												"Pl_count": {
 													"value": "@activity('count_nuber_of_records').output.count",
 													"type": "Expression"
+												},
+												"Pl_water_mark": {
+													"value": "@activity('Get_Max_water_mark').output.firstRow.water_mark",
+													"type": "Expression"
 												}
 											}
 										}
