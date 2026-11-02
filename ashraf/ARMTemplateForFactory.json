@@ -1024,6 +1024,42 @@
 											}
 										}
 									]
+								},
+								{
+									"name": "Update Water_Marks_table",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Copy data1",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "Ls_SQL_DataBase",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "update @{pipeline().parameters.Pl_schema_name}.watermarks set water_mark = SYSUTCDATETIME() where table_name = '@{pipeline().parameters.Pl_table_name}'",
+													"type": "Expression"
+												}
+											}
+										],
+										"scriptBlockExecutionTimeout": "02:00:00"
+									}
 								}
 							]
 						}
@@ -1043,7 +1079,7 @@
 					},
 					"Pl_count": {
 						"type": "string",
-						"defaultValue": "10"
+						"defaultValue": "12"
 					},
 					"Pl_water_mark": {
 						"type": "string",
@@ -1058,7 +1094,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_read_Table_Data')]",
-				"[concat(variables('factoryId'), '/datasets/Ds_Adls_Parqu')]"
+				"[concat(variables('factoryId'), '/datasets/Ds_Adls_Parqu')]",
+				"[concat(variables('factoryId'), '/linkedServices/Ls_SQL_DataBase')]"
 			]
 		},
 		{
