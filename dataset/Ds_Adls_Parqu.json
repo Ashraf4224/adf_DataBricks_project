@@ -15,7 +15,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "Landing_Files",
+				"folderPath": {
+					"value": "@dataset().DS_File_name",
+					"type": "Expression"
+				},
 				"fileSystem": "incremetalload"
 			},
 			"compressionCodec": "snappy"
