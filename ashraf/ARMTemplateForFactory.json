@@ -259,6 +259,10 @@
 														"Pl_count": {
 															"value": "@activity('count_nuber_of_records').output.count",
 															"type": "Expression"
+														},
+														"Pl_water_mark": {
+															"value": "@activity('Get_Max_water_mark').output.firstRow.water_mark",
+															"type": "Expression"
 														}
 													}
 												}
@@ -966,6 +970,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "select * from @{pipeline().parameters.Pl_schema_name}.@{pipeline().parameters.Pl_table_name} where watermark > '@{pipeline().parameters.Pl_water_mark}'",
+												"type": "Expression"
+											},
 											"queryTimeout": "02:00:00",
 											"partitionOption": "None"
 										},
@@ -1036,6 +1044,10 @@
 					"Pl_count": {
 						"type": "string",
 						"defaultValue": "10"
+					},
+					"Pl_water_mark": {
+						"type": "string",
+						"defaultValue": "2025-10-31T15:02:00.4182482Z"
 					}
 				},
 				"folder": {
