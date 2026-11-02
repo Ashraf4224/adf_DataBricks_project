@@ -533,7 +533,7 @@
 					"location": {
 						"type": "AzureBlobFSLocation",
 						"fileName": {
-							"value": "@concat(dataset().DS_File_name,'.parquet')",
+							"value": "@concat(dataset().DS_File_name,'utcNow()','.parquet')",
 							"type": "Expression"
 						},
 						"folderPath": {
@@ -794,7 +794,7 @@
 							},
 							"ifTrueActivities": [
 								{
-									"name": "Copy data1",
+									"name": "Copy_data_from_sql_to_ADLS",
 									"type": "Copy",
 									"dependsOn": [],
 									"policy": {
@@ -868,7 +868,7 @@
 									"type": "Script",
 									"dependsOn": [
 										{
-											"activity": "Copy data1",
+											"activity": "Copy_data_from_sql_to_ADLS",
 											"dependencyConditions": [
 												"Succeeded"
 											]
