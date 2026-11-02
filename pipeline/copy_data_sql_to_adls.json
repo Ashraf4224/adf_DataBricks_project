@@ -82,6 +82,42 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Update Water_Marks_table",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Copy data1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "Ls_SQL_DataBase",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "update @{pipeline().parameters.Pl_schema_name}.watermarks set water_mark = SYSUTCDATETIME() where table_name = '@{pipeline().parameters.Pl_table_name}'",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
 						}
 					]
 				}
@@ -89,16 +125,20 @@
 		],
 		"parameters": {
 			"Pl_schema_name": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "dbo"
 			},
 			"Pl_table_name": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "customers"
 			},
 			"Pl_count": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "12"
 			},
 			"Pl_water_mark": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "2025-10-31T15:02:00.4182482Z"
 			}
 		},
 		"folder": {
