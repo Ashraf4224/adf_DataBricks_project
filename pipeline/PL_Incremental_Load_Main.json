@@ -155,7 +155,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "select count(*) as count from @{pipeline().parameters.PL_P_schema_name}.@{item().table_name}",
+													"value": "SELECT COUNT(*) AS numOfRecords FROM @{pipeline().parameters.PL_P_schema_name}.@{item().table_name} where watermark > '@{activity('Get_Max_water_mark').output.firstRow.water_mark}'",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -175,7 +175,7 @@
 													}
 												}
 											},
-											"firstRowOnly": false
+											"firstRowOnly": true
 										}
 									},
 									{
@@ -209,7 +209,7 @@
 													"type": "Expression"
 												},
 												"Pl_count": {
-													"value": "@activity('count_nuber_of_records').output.count",
+													"value": "@activity('count_nuber_of_records').output.firstRow.numOfRecords",
 													"type": "Expression"
 												},
 												"Pl_water_mark": {
