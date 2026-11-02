@@ -266,11 +266,84 @@
 														}
 													}
 												}
+											},
+											{
+												"name": "add_table_name_on_success",
+												"type": "AppendVariable",
+												"dependsOn": [
+													{
+														"activity": "Execute Pipeline copy data",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "on_success",
+													"value": {
+														"value": "@{item().table_name} - SUCCESS",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "add_table_on_failure",
+												"type": "AppendVariable",
+												"dependsOn": [
+													{
+														"activity": "Execute Pipeline copy data",
+														"dependencyConditions": [
+															"Failed"
+														]
+													}
+												],
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "on_failure",
+													"value": {
+														"value": "@{item().table_name} - FAILURE",
+														"type": "Expression"
+													}
+												}
 											}
 										]
 									}
 								}
 							]
+						}
+					},
+					{
+						"name": "send_email_notification",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ForEach_Read_All_Table_names",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"policy": {
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Pl_Email_Send_Multiple_Email",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"email_rec": {
+									"value": "@pipeline().globalParameters.email",
+									"type": "Expression"
+								},
+								"list_of_tables": {
+									"value": "@variables('on_success')",
+									"type": "Expression"
+								}
+							}
 						}
 					}
 				],
@@ -290,6 +363,12 @@
 				"variables": {
 					"today_Date": {
 						"type": "String"
+					},
+					"on_success": {
+						"type": "Array"
+					},
+					"on_failure": {
+						"type": "Array"
 					}
 				},
 				"folder": {
@@ -300,6 +379,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_read_Table_Data')]",
+				"[concat(variables('factoryId'), '/pipelines/Pl_Email_Send_Multiple_Email')]",
 				"[concat(variables('factoryId'), '/pipelines/copy_data_sql_to_adls')]"
 			]
 		},
