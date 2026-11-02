@@ -101,7 +101,8 @@
 				"defaultValue": "10"
 			},
 			"Pl_water_mark": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "2025-10-31T15:02:00.4182482Z"
 			}
 		},
 		"folder": {
