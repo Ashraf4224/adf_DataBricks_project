@@ -89,20 +89,16 @@
 		],
 		"parameters": {
 			"Pl_schema_name": {
-				"type": "string",
-				"defaultValue": "dbo"
+				"type": "string"
 			},
 			"Pl_table_name": {
-				"type": "string",
-				"defaultValue": "customers"
+				"type": "string"
 			},
 			"Pl_count": {
-				"type": "string",
-				"defaultValue": "10"
+				"type": "string"
 			},
 			"Pl_water_mark": {
-				"type": "string",
-				"defaultValue": "2025-10-31T15:02:00.4182482Z"
+				"type": "string"
 			}
 		},
 		"folder": {
