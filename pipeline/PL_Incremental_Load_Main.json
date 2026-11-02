@@ -155,7 +155,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "SELECT COUNT(*) AS numOfRecords FROM @{pipeline().parameters.PL_P_schema_name}.@{item().table_name} where watermark > '@{activity('Get_Max_water_mark').output.firstRow.water_mark}'",
+													"value": "select count(*) as count from @{pipeline().parameters.PL_P_schema_name}.@{item().table_name}",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -175,7 +175,7 @@
 													}
 												}
 											},
-											"firstRowOnly": true
+											"firstRowOnly": false
 										}
 									},
 									{
@@ -209,53 +209,13 @@
 													"type": "Expression"
 												},
 												"Pl_count": {
-													"value": "@activity('count_nuber_of_records').output.firstRow.numOfRecords",
+													"value": "@activity('count_nuber_of_records').output.count",
 													"type": "Expression"
 												},
 												"Pl_water_mark": {
 													"value": "@activity('Get_Max_water_mark').output.firstRow.water_mark",
 													"type": "Expression"
 												}
-											}
-										}
-									},
-									{
-										"name": "add_table_name_on_success",
-										"type": "AppendVariable",
-										"dependsOn": [
-											{
-												"activity": "Execute Pipeline copy data",
-												"dependencyConditions": [
-													"Succeeded"
-												]
-											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "on_success",
-											"value": {
-												"value": "@{item().table_name} - SUCCESS",
-												"type": "Expression"
-											}
-										}
-									},
-									{
-										"name": "add_table_on_failure",
-										"type": "AppendVariable",
-										"dependsOn": [
-											{
-												"activity": "Execute Pipeline copy data",
-												"dependencyConditions": [
-													"Failed"
-												]
-											}
-										],
-										"userProperties": [],
-										"typeProperties": {
-											"variableName": "on_failure",
-											"value": {
-												"value": "@{item().table_name} - FAILURE",
-												"type": "Expression"
 											}
 										}
 									}
