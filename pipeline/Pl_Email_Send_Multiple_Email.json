@@ -1,0 +1,130 @@
+{
+	"name": "Pl_Email_Send_Multiple_Email",
+	"properties": {
+		"activities": [
+			{
+				"name": "send_email",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "logical_email_body",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": "https://prod-15.southindia.logic.azure.com:443/workflows/ad6a9592af414d18894c4b77d52b100c/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=xLY9SuTVUebqFpzWyvlTGJNIDCfIafRprNHNGzoVquk",
+					"body": {
+						"value": "@variables('logical_body')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "logical_email_body",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "prepare_subject",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "preparing_body",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "logical_body",
+					"value": {
+						"value": "{\n    \"email\": \"@{pipeline().parameters.email_rec}\",\n    \"subject\": \"@{variables('subject')}\",\n    \"body\": \"@{variables('prepare_body')}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "prepare_subject",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "subject",
+					"value": {
+						"value": "Injection Tables",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "preparing_body",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "prepare_body",
+					"value": {
+						"value": "Data ingestion has been initiated for all tables. Their respective statuses are listed below: ', @{replace(string(pipeline().parameters.list_of_tables), '\"', '')}",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"email_rec": {
+				"type": "string"
+			},
+			"list_of_tables": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"logical_body": {
+				"type": "String"
+			},
+			"subject": {
+				"type": "String"
+			},
+			"body": {
+				"type": "String"
+			},
+			"prepare_body": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Incremental_load"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-11-01T04:52:03Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
