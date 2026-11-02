@@ -1,0 +1,39 @@
+{
+	"name": "DS_read_table_names",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Ls_SQL_DataBase",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "name",
+				"type": "varchar"
+			},
+			{
+				"name": "email",
+				"type": "varchar"
+			},
+			{
+				"name": "phone",
+				"type": "varchar"
+			},
+			{
+				"name": "watermark",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"table": ""
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

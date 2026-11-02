@@ -1,0 +1,202 @@
+{
+	"name": "Pl_For_multiple_copy",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "read_list_of_tables_from_db",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('read_list_of_tables_from_db').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Execute_copy_injection",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "pl_copy_table_data",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Pl_Schema": {
+										"value": "@pipeline().parameters.PL_schema_name",
+										"type": "Expression"
+									},
+									"Pl_table_name": {
+										"value": "@item().table_name",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Store_process_sucess",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute_copy_injection",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "sucess",
+								"value": {
+									"value": "@{item().table_name} - SUCCESS",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Store_process_failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Execute_copy_injection",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "failure",
+								"value": {
+									"value": "@{item().table_name} - FAILURE",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "read_list_of_tables_from_db",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select table_name from @{pipeline().parameters.PL_schema_name}.@{pipeline().parameters.PL_table_name}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_read_Table_Data",
+						"type": "DatasetReference",
+						"parameters": {
+							"SinP_schema": {
+								"value": "@pipeline().globalParameters.email",
+								"type": "Expression"
+							},
+							"SinP_Table_name": "customers"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Semd_Consolation_Email",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ForEach_table",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Pl_Email_Send_Multiple",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"email_rec": {
+							"value": "@pipeline().globalParameters.email",
+							"type": "Expression"
+						},
+						"list_of_tables": {
+							"value": "@variables('sucess')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Fail_occure",
+				"type": "Fail",
+				"dependsOn": [
+					{
+						"activity": "ForEach_table",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"message": "PipeLine failed Inside FoeEach_table",
+					"errorCode": "500"
+				}
+			}
+		],
+		"parameters": {
+			"PL_schema_name": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"PL_table_name": {
+				"type": "string",
+				"defaultValue": "list_of_tables"
+			}
+		},
+		"variables": {
+			"sucess": {
+				"type": "Array"
+			},
+			"failure": {
+				"type": "Array"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-11-01T05:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

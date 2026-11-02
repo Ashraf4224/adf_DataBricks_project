@@ -1,0 +1,53 @@
+{
+	"name": "Pl_for_read_table_names",
+	"properties": {
+		"activities": [
+			{
+				"name": "read_Table_data_from_DB",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_read_Table_Data",
+						"type": "DatasetReference",
+						"parameters": {
+							"SinP_schema": {
+								"value": "@pipeline().parameters.Pl_schema",
+								"type": "Expression"
+							},
+							"SinP_Table_name": {
+								"value": "@pipeline().parameters.Pl_table_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"parameters": {
+			"Pl_schema": {
+				"type": "string"
+			},
+			"Pl_table_name": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-10-31T10:59:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,21 @@
+{
+	"name": "ashraf",
+	"properties": {
+		"globalParameters": {
+			"email": {
+				"type": "string",
+				"value": "ashirafdarubaigari@gmail.com"
+			}
+		},
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "southindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "df517dfa-d1d6-4e2f-9397-f2dcbad29b34",
+		"tenantId": "144b3a6a-a029-4539-a9b7-2ce4f8134dc4"
+	}
+}

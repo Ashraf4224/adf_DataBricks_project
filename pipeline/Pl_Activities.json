@@ -1,0 +1,63 @@
+{
+	"name": "Pl_Activities",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get_Metadata_Source",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "Ds_get_metadata",
+						"type": "DatasetReference",
+						"parameters": {
+							"Ds_folder": {
+								"value": "@pipeline().parameters.PL_Source_Folder",
+								"type": "Expression"
+							},
+							"DS_file_name": {
+								"value": "@pipeline().parameters.PL_Source_File_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"PL_Source_Folder": {
+				"type": "string",
+				"defaultValue": "source"
+			},
+			"PL_Source_File_name": {
+				"type": "string",
+				"defaultValue": "*"
+			}
+		},
+		"folder": {
+			"name": "Practies_activities"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-11-01T06:46:22Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

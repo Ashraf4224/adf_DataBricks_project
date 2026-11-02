@@ -1,0 +1,247 @@
+{
+	"name": "PL_Incremental_Load_Main",
+	"properties": {
+		"activities": [
+			{
+				"name": "Read_Table_names_from_sqlDB",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "select table_name from @{pipeline().parameters.PL_P_schema_name}.@{pipeline().parameters.PL_P_table_name}",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "DS_read_Table_Data",
+						"type": "DatasetReference",
+						"parameters": {
+							"SinP_schema": {
+								"value": "@pipeline().parameters.PL_P_schema_name",
+								"type": "Expression"
+							},
+							"SinP_Table_name": {
+								"value": "@pipeline().parameters.PL_P_table_name",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach_Read_All_Table_names",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Read_Table_names_from_sqlDB",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Read_Table_names_from_sqlDB').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Get_Max_water_mark",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "select water_mark from @{pipeline().parameters.PL_P_schema_name}.watermarks where table_name = '@{item().table_name}'",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_read_Table_Data",
+									"type": "DatasetReference",
+									"parameters": {
+										"SinP_schema": {
+											"value": "@pipeline().parameters.PL_P_schema_name",
+											"type": "Expression"
+										},
+										"SinP_Table_name": {
+											"value": "@item().table_name",
+											"type": "Expression"
+										}
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "Today_date",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "today_Date",
+								"value": {
+									"value": "@utcNow()",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Checking_date",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get_Max_water_mark",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "Today_date",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@less(activity('Get_Max_water_mark').output.firstRow.water_mark, variables('today_Date'))",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "count_nuber_of_records",
+										"type": "Lookup",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "0.12:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"source": {
+												"type": "AzureSqlSource",
+												"sqlReaderQuery": {
+													"value": "select count(*) as count from @{pipeline().parameters.PL_P_schema_name}.@{item().table_name}",
+													"type": "Expression"
+												},
+												"queryTimeout": "02:00:00",
+												"partitionOption": "None"
+											},
+											"dataset": {
+												"referenceName": "DS_read_Table_Data",
+												"type": "DatasetReference",
+												"parameters": {
+													"SinP_schema": {
+														"value": "@pipeline().parameters.PL_P_schema_name",
+														"type": "Expression"
+													},
+													"SinP_Table_name": {
+														"value": "@item().table_name",
+														"type": "Expression"
+													}
+												}
+											},
+											"firstRowOnly": false
+										}
+									},
+									{
+										"name": "Execute Pipeline copy data",
+										"type": "ExecutePipeline",
+										"dependsOn": [
+											{
+												"activity": "count_nuber_of_records",
+												"dependencyConditions": [
+													"Succeeded"
+												]
+											}
+										],
+										"policy": {
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "copy_data_sql_to_adls",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"Pl_schema_name": {
+													"value": "@pipeline().parameters.PL_P_schema_name",
+													"type": "Expression"
+												},
+												"Pl_table_name": {
+													"value": "@item().table_name",
+													"type": "Expression"
+												},
+												"Pl_count": {
+													"value": "@activity('count_nuber_of_records').output.count",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"PL_P_schema_name": {
+				"type": "string",
+				"defaultValue": "dbo"
+			},
+			"PL_P_table_name": {
+				"type": "string",
+				"defaultValue": "list_of_tables"
+			}
+		},
+		"variables": {
+			"today_Date": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Incremental_load"
+		},
+		"annotations": [],
+		"lastPublishTime": "2026-11-02T10:33:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
