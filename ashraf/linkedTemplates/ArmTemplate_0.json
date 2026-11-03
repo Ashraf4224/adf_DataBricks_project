@@ -392,20 +392,13 @@
 				},
 				"parameters": {
 					"email_rec": {
-						"type": "string",
-						"defaultValue": "ashirafdarubaigari@gmail.com"
+						"type": "string"
 					},
 					"list_of_tables": {
-						"type": "array",
-						"defaultValue": [
-							"adv",
-							"dfg",
-							"dds"
-						]
+						"type": "array"
 					},
 					"Pl_run_id": {
-						"type": "string",
-						"defaultValue": "12563"
+						"type": "string"
 					}
 				},
 				"variables": {
