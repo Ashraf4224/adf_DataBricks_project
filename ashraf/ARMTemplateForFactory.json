@@ -813,7 +813,7 @@
 						"typeProperties": {
 							"variableName": "logical_body",
 							"value": {
-								"value": "{\n    \"email\": \"@{pipeline().parameters.email_rec}\",\n    \"subject\": \"@{variables('subject')}\",\n    \"body\": \"@{variables('prepare_body')}\"\n}",
+								"value": "{\n    \"email_rec\": \"@{pipeline().parameters.email_rec}\",\n    \"subject\": \"@{variables('subject')}\",\n    \"body\": \"@{variables('prepare_body')}\"\n}",
 								"type": "Expression"
 							}
 						}
