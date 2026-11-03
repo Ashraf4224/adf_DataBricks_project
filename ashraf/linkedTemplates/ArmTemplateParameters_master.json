@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "ashraf"
 		},
+		"LS_AzureDatabricks_accessToken": {
+			"value": ""
+		},
 		"Ls_ADLS_accountKey": {
 			"value": ""
 		},
@@ -13,6 +16,9 @@
 		},
 		"Ls_SQL_DataBase_password": {
 			"value": ""
+		},
+		"LS_AzureDatabricks_properties_typeProperties_existingClusterId": {
+			"value": "1103-082555-tj2vuv8b"
 		},
 		"Ls_ADLS_properties_typeProperties_url": {
 			"value": "https://demo1project.dfs.core.windows.net/"

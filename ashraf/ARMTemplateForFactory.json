@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "ashraf"
 		},
+		"LS_AzureDatabricks_accessToken": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accessToken' of 'LS_AzureDatabricks'"
+		},
 		"Ls_ADLS_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'Ls_ADLS'"
@@ -18,6 +22,10 @@
 		"Ls_SQL_DataBase_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Ls_SQL_DataBase'"
+		},
+		"LS_AzureDatabricks_properties_typeProperties_existingClusterId": {
+			"type": "string",
+			"defaultValue": "1103-082555-tj2vuv8b"
 		},
 		"Ls_ADLS_properties_typeProperties_url": {
 			"type": "string",
@@ -1180,7 +1188,14 @@
 								{
 									"name": "Copy_data_from_sql_to_ADLS",
 									"type": "Copy",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Set_Time",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "0.12:00:00",
 										"retry": 0,
@@ -1282,6 +1297,93 @@
 										],
 										"scriptBlockExecutionTimeout": "02:00:00"
 									}
+								},
+								{
+									"name": "Landing_to_Bronze",
+									"type": "DatabricksNotebook",
+									"dependsOn": [
+										{
+											"activity": "Copy_data_from_sql_to_ADLS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/demo1project/ashraf_adb_repo/landing_to_bronze_layer",
+										"baseParameters": {
+											"table_name": {
+												"value": "@pipeline().parameters.Pl_table_name",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_AzureDatabricks",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Bronze_to_Silver",
+									"type": "DatabricksNotebook",
+									"dependsOn": [
+										{
+											"activity": "Landing_to_Bronze",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"notebookPath": "/demo1project/ashraf_adb_repo/Bronze_to_silver",
+										"baseParameters": {
+											"table_name": {
+												"value": "@pipeline().parameters.Pl_table_name",
+												"type": "Expression"
+											},
+											"lading_timestamp": {
+												"value": "@variables('set_Time')",
+												"type": "Expression"
+											}
+										}
+									},
+									"linkedServiceName": {
+										"referenceName": "LS_AzureDatabricks",
+										"type": "LinkedServiceReference"
+									}
+								},
+								{
+									"name": "Set_Time",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "set_Time",
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
@@ -1310,6 +1412,9 @@
 					},
 					"onFailure": {
 						"type": "Array"
+					},
+					"set_Time": {
+						"type": "String"
 					}
 				},
 				"folder": {
@@ -1321,7 +1426,8 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_read_Table_Data')]",
 				"[concat(variables('factoryId'), '/datasets/Ds_Adls_Parqu')]",
-				"[concat(variables('factoryId'), '/linkedServices/Ls_SQL_DataBase')]"
+				"[concat(variables('factoryId'), '/linkedServices/Ls_SQL_DataBase')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_AzureDatabricks')]"
 			]
 		},
 		{
@@ -1889,6 +1995,24 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/Ls_ADLS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_AzureDatabricks')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": "https://adb-7405605361613328.8.azuredatabricks.net",
+					"accessToken": {
+						"type": "SecureString",
+						"value": "[parameters('LS_AzureDatabricks_accessToken')]"
+					},
+					"existingClusterId": "[parameters('LS_AzureDatabricks_properties_typeProperties_existingClusterId')]"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Ls_ADLS')]",
