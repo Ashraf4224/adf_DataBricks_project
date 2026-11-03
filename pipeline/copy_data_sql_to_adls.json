@@ -118,46 +118,6 @@
 								],
 								"scriptBlockExecutionTimeout": "02:00:00"
 							}
-						},
-						{
-							"name": "add_table_name_on_success",
-							"type": "AppendVariable",
-							"dependsOn": [
-								{
-									"activity": "Copy_data_from_sql_to_ADLS",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "onSuccess",
-								"value": {
-									"value": "@{pipeline().parameters.Pl_table_name} - SUCCESS",
-									"type": "Expression"
-								}
-							}
-						},
-						{
-							"name": "add_table_on_failure",
-							"type": "AppendVariable",
-							"dependsOn": [
-								{
-									"activity": "Copy_data_from_sql_to_ADLS",
-									"dependencyConditions": [
-										"Failed"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "onFailure",
-								"value": {
-									"value": "@{pipeline().parameters.Pl_table_name} - FAILURE",
-									"type": "Expression"
-								}
-							}
 						}
 					]
 				}

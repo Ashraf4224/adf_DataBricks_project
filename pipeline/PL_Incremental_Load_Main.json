@@ -155,7 +155,7 @@
 											"source": {
 												"type": "AzureSqlSource",
 												"sqlReaderQuery": {
-													"value": "select count(*) as count from @{pipeline().parameters.PL_P_schema_name}.@{item().table_name}",
+													"value": "select count(*) as recods from @{pipeline().parameters.PL_P_schema_name}.@{item().table_name} where watermark > '@{activity('Get_Max_water_mark').output.firstRow.water_mark}'",
 													"type": "Expression"
 												},
 												"queryTimeout": "02:00:00",
@@ -175,7 +175,7 @@
 													}
 												}
 											},
-											"firstRowOnly": false
+											"firstRowOnly": true
 										}
 									},
 									{
@@ -209,7 +209,7 @@
 													"type": "Expression"
 												},
 												"Pl_count": {
-													"value": "@activity('count_nuber_of_records').output.count",
+													"value": "@activity('count_nuber_of_records').output.firstRow.recods",
 													"type": "Expression"
 												},
 												"Pl_water_mark": {
@@ -220,6 +220,46 @@
 										}
 									}
 								]
+							}
+						},
+						{
+							"name": "add_table_name_on_success",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Checking_date",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "on_success",
+								"value": {
+									"value": "@{item().table_name} - SUCCESS. Number of new recods are @{activity('count_nuber_of_records').output.firstRow.recods}.",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "add_table_on_failure",
+							"type": "AppendVariable",
+							"dependsOn": [
+								{
+									"activity": "Checking_date",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "on_failure",
+								"value": {
+									"value": "@{item().table_name} - FAILURE",
+									"type": "Expression"
+								}
 							}
 						}
 					]
