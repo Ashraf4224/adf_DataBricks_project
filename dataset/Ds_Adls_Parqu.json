@@ -23,7 +23,7 @@
 					"value": "@dataset().DS_File_name",
 					"type": "Expression"
 				},
-				"fileSystem": "incremetalload"
+				"fileSystem": "newdatasqltoadlslanding"
 			},
 			"compressionCodec": "snappy"
 		},
