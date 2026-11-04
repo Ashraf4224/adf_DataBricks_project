@@ -186,7 +186,7 @@
 										"type": "Expression"
 									},
 									"lading_timestamp": {
-										"value": "@variables('set_Time')",
+										"value": "@pipeline().parameters.Pl_water_mark",
 										"type": "Expression"
 									}
 								}
